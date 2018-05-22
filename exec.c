@@ -39,8 +39,8 @@ exec(char *path, char **argv)
     goto bad;
 
   // Load program into memory.
-  sz = 0; // ORIGINAL
-  //sz = PGSIZE - 1; 
+  //sz = 0; // ORIGINAL
+  sz = PGSIZE; 
   for(i=0, off=elf.phoff; i<elf.phnum; i++, off+=sizeof(ph)){
     if(readi(ip, (char*)&ph, off, sizeof(ph)) != sizeof(ph))
       goto bad;
@@ -64,21 +64,23 @@ exec(char *path, char **argv)
   // ORIGINAL // Allocate two pages at the next page boundary.
               // Make the first inaccessible.  Use the second as the user stack.
   //sz = PGROUNDUP(sz);
-  sz = USERTOP;  
+  //sz = USERTOP;  
   curproc->stackSize = 1; 
-  curproc->stackStart = sz;
+  curproc->stackStart = USERTOP;
 
   // Set up the stack at the top of user space 
   curproc->growing = 1;
-  if((sz = allocuvm(pgdir, sz, sz + PGSIZE) - 1) == 0)
+  //if((sz = allocuvm(pgdir, sz, sz + PGSIZE) - 1) == 0)
+  uint newSP;
+  if((newSP = allocuvm(pgdir, USERTOP - PGSIZE, USERTOP)) == 0)
     goto bad;
   curproc->growing = 0; 
   //clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
   
   // Set the stack pointer to the top of the userspace.
-   sp = sz; // ORIGINAL
-            //sp = USERTOP;
-
+   //sp = sz; // ORIGINAL
+   sp = newSP;  
+  
   // Push argument strings, prepare rest of stack in ustack.
   for(argc = 0; argv[argc]; argc++) {
     if(argc >= MAXARG)
@@ -110,7 +112,7 @@ exec(char *path, char **argv)
   curproc->sz = sz;
   curproc->tf->eip = elf.entry;  // main
   curproc->tf->esp = sp;
-  curproc->stackSize = PGSIZE;
+  curproc->stackStart = USERTOP - PGSIZE;
   switchuvm(curproc);
   freevm(oldpgdir);
   return 0;
