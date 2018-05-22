@@ -14,5 +14,5 @@
 #define V2P_WO(x) ((x) - KERNBASE)    // same as V2P, but without casts
 #define P2V_WO(x) ((x) + KERNBASE)    // same as P2V, but without casts
 //#define USERTOP ( KERNBASE - PGSIZE  ) //end of user address space
-//#define USERTOP 0xA0000000  //end of user address space
-#define USERTOP KERNBASE - 0x40 //end of user address space
+//#define USERTOP KERNBASE - 1  //end of user address space
+#define USERTOP  0x7FFFFFFC //end of user address space

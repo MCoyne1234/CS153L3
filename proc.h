@@ -49,8 +49,8 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-  uint stackSize;              // LAB3 size of the stack and also the location for some reason.
-  uint stackStart;             // LAB3 location of heap in memory.
+  uint stackSize;              // LAB3 number of pages in the stack.
+  uint stackTop;               // LAB3 location of top of stack in memory.
   int growing;                 // LAB3 flag = 1 if growing.
 };
 

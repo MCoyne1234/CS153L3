@@ -108,8 +108,7 @@ static struct kmap {
   uint phys_end;
   int perm;
 } kmap[] = {
- //{ (void*)KERNBASE, 0,             EXTMEM,    PTE_W}, // I/O space
- { (void*)USERTOP, 0,             EXTMEM,    PTE_W}, // I/O space
+ { (void*)KERNBASE, 0,  EXTMEM,    PTE_W}, // I/O space
  { (void*)KERNLINK, V2P(KERNLINK), V2P(data), 0},     // kern text+rodata
  { (void*)data,     V2P(data),     PHYSTOP,   PTE_W}, // kern data+memory
  { (void*)DEVSPACE, DEVSPACE,      0,         PTE_W}, // more devices
@@ -225,8 +224,8 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   char *mem;
   uint a;
 
-  //if(newsz >= KERNBASE)
-  if(newsz > USERTOP)
+  if(newsz >= KERNBASE)
+  //if(newsz > USERTOP)
     return 0;
   if(newsz < oldsz)
     return oldsz;
@@ -315,8 +314,8 @@ clearpteu(pde_t *pgdir, char *uva)
 // Given a parent process's page table, create a copy
 // of it for a child.
 pde_t*
-//copyuvm(pde_t *pgdir, uint sz)
-copyuvm(pde_t *pgdir, uint sz, uint stackStart)
+copyuvm(pde_t *pgdir, uint sz)
+//copyuvm(pde_t *pgdir, uint sz, uint stackTop)
 {
   pde_t *d;
   pte_t *pte;
@@ -325,8 +324,25 @@ copyuvm(pde_t *pgdir, uint sz, uint stackStart)
 
   if((d = setupkvm()) == 0)
     return 0;
-  //for(i = 0; i < sz; i += PGSIZE){
-  for(i = 0; i < myproc()->stackStart; i += PGSIZE){
+  for(i = 0; i < sz; i += PGSIZE){
+    if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
+      panic("copyuvm: pte should exist");
+    if(!(*pte & PTE_P))
+      panic("copyuvm: page not present");
+    pa = PTE_ADDR(*pte);
+    flags = PTE_FLAGS(*pte);
+    if((mem = kalloc()) == 0)
+      goto bad;
+    memmove(mem, (char*)P2V(pa), PGSIZE);
+    if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
+      goto bad;
+  }
+
+
+  //if( stackTop == 0 )
+    //return d;
+  // Loop to copy stack
+  for(i = USERTOP - myproc()->stackSize*PGSIZE + 4; i < USERTOP; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P))
