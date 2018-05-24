@@ -338,15 +338,14 @@ copyuvm(pde_t *pgdir, uint sz)
       goto bad;
   }
 
-
   //if( stackTop == 0 )
     //return d;
   // Loop to copy stack
   for(i = USERTOP - myproc()->stackSize*PGSIZE + 4; i < USERTOP; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
-      panic("copyuvm: pte should exist");
+      panic("copyuvm2: pte should exist");
     if(!(*pte & PTE_P))
-      panic("copyuvm: page not present");
+      panic("copyuvm2: page not present");
     pa = PTE_ADDR(*pte);
     flags = PTE_FLAGS(*pte);
     if((mem = kalloc()) == 0)
