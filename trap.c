@@ -36,9 +36,8 @@ idtinit(void)
 void
 trap(struct trapframe *tf)
 {
-  //uint sp;
+  uint sp;
   uint rcr;
-  char *mem;
 
   if(tf->trapno == T_SYSCALL){
     if(myproc()->killed)
@@ -82,55 +81,23 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_PGFLT:
-rcr = PGROUNDDOWN(rcr2());
-    //rcr = PGROUNDUP(rcr2());
-    //rcr = rcr2();
-    cprintf("PAGEFAULT: ALLOCATING MORE PAGES. rcr2() = %d \n",  rcr );
-  /*  
-    //sp = myproc()->tf->esp;
-    //if( (rcr2() < sp ) && ( rcr2() > ( sp - PGSIZE ) )  ){
-    //if( (rcr2() < myproc()->stackTop) && ( rcr2() >= (  myproc()->stackTop - PGSIZE ) )  ){
-      //if( allocuvm( myproc()->pgdir, myproc()->stackTop - PGSIZE, myproc()->stackTop ) == ;
+    rcr = rcr2();
+//cprintf("PAGEFAULT: ALLOCATING MORE PAGES. rcr2() = %d PROCESS STACK PAGES: %d\n", rcr, myproc()->stackSize );  // LAB3 Prints the Address that caused the page fault;
+///*  
       if ( (sp = allocuvm( myproc()->pgdir, rcr - PGSIZE, rcr )) == 0 ){
-          cprintf("OUT OF MEMORY. PROGRAM WILL EXIT.\n");
+          //cprintf("OUT OF MEMORY. PROGRAM WILL EXIT. PROCESS STACK PAGES: %d\n", myproc()->stackSize);
           myproc()->killed = 1;
           exit();
-      }else if(sp == -1){
-        cprintf("BAD TIMES, BRO.");
       }else{
-        myproc()->stackTop -= PGSIZE;
         ++(myproc()->stackSize);
-        //myproc()->tf->esp -= PGSIZE;
-        cprintf("ALLOCATED.\n");
       }
-    //}
-*/
-
-    mem = kalloc();
-    if(mem == 0){
-      cprintf("allocuvm out of memory\n");
-      cprintf("pid %d %s: trap %d err %d on cpu %d "
-            "eip 0x%x addr 0x%x--kill proc\n",
-            myproc()->pid, myproc()->name, tf->trapno,
-            tf->err, cpuid(), tf->eip, rcr2());
-      myproc()->killed = 1;
-      return;
-    }
-    memset(mem, 0, PGSIZE);
-    if(mappages(myproc()->pgdir, (char*)rcr, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
-      cprintf("allocuvm out of memory (2)\n");
-      //deallocuvm(pgdir, newsz, oldsz);
-      //kfree(mem);
-      return;
-    }
-
-   //++(myproc()->stackSize);
+//*/
+   ///*
     if( myproc()->stackSize > 8) {
       cprintf("KILLED\n");
       myproc()->killed = 1;
     }
-    
- myproc()->stackTop -= PGSIZE;
+   //*/
  ++(myproc()->stackSize);
     //lapiceoi()
     return;

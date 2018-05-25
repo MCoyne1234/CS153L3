@@ -66,10 +66,8 @@ exec(char *path, char **argv)
  
   // Set up the stack at the top of user space 
   // Set the stack pointer to the top of the userspace.
-  curproc->growing = 1;
     if((sp = allocuvm(pgdir, USERTOP - PGSIZE, USERTOP)) == 0)
       goto bad;
-  curproc->growing = 0; 
   //clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
   
   // Push argument strings, prepare rest of stack in ustack.
@@ -103,7 +101,6 @@ exec(char *path, char **argv)
   curproc->sz = sz;
   curproc->tf->eip = elf.entry;  // main
   curproc->tf->esp = sp;
-  curproc->stackTop = USERTOP - PGSIZE;
   curproc->stackSize = 1; 
   switchuvm(curproc);
   freevm(oldpgdir);

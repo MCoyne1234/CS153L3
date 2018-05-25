@@ -161,7 +161,8 @@ growproc(int n)
   uint sz;
   struct proc *curproc = myproc();
 
-  sz = curproc->sz;
+  //sz = curproc->sz;
+  sz = curproc->stackSize*PGSIZE;
   if(n > 0){
     if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
       return -1;
@@ -169,7 +170,8 @@ growproc(int n)
     if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0)
       return -1;
   }
-  curproc->sz = sz;
+  //curproc->sz = sz;
+  ++(curproc->stackSize);
   switchuvm(curproc);
   return 0;
 }
@@ -201,7 +203,6 @@ fork(void)
   np->parent = curproc;
   *np->tf = *curproc->tf;
   np->stackSize = curproc->stackSize;
-  np->stackTop= curproc->stackTop;
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;

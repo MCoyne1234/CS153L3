@@ -64,7 +64,8 @@ argptr(int n, char **pp, int size)
  
   if(argint(n, &i) < 0)
     return -1;
-  if(size < 0 || (uint)i >= KERNBASE || (uint)i+size > KERNBASE)
+  //if(size < 0 || (uint)i >= KERNBASE || (uint)i+size > KERNBASE)
+  if(size < 0 || (uint)i >= KERNBASE || (uint)i+size > USERTOP)
     return -1;
   *pp = (char*)i;
   return 0;
