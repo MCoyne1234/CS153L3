@@ -315,7 +315,6 @@ clearpteu(pde_t *pgdir, char *uva)
 // of it for a child.
 pde_t*
 copyuvm(pde_t *pgdir, uint sz)
-//copyuvm(pde_t *pgdir, uint sz, uint stackTop)
 {
   pde_t *d;
   pte_t *pte;
