@@ -28,10 +28,10 @@ int main(int argc, char *argv[]){
   
 ///*
  int pid=0;
-  printf(1, "PID BEFORE: %d\n", getpid() );
+  printf(1, "PID: %d\n", getpid() );
   
   pid=fork();
-  printf(1, "PID AFTER: %d\n", getpid());
+  //printf(1, "PID AFTER: %d\n", getpid());
   
    if(pid==0){
        test(1);
