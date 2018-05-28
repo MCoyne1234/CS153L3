@@ -162,8 +162,8 @@ growproc(int n)
   struct proc *curproc = myproc();
   
   //sz = curproc->sz;
-  sz = KERNBASE - curproc->stackSize*PGSIZE;
-  //sz = USERTOP - curproc->stackSize*PGSIZE;
+  //sz = KERNBASE - curproc->stackSize*PGSIZE;
+  sz = USERTOP - curproc->stackSize*PGSIZE;
   if(n > 0){
     //if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
     if((sz = allocuvm(curproc->pgdir, PGROUNDDOWN(sz-n), sz)) == 0)
