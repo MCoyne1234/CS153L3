@@ -230,7 +230,8 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   if(newsz < oldsz)
     return oldsz;
 
-  a = PGROUNDUP(oldsz);
+  //a = PGROUNDUP(oldsz);
+  a = PGROUNDDOWN(oldsz);
   for(; a < newsz; a += PGSIZE){
     mem = kalloc();
     if(mem == 0){
@@ -245,6 +246,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
       kfree(mem);
       return 0;
     }
+   //++(myproc()->stackSize);
   }
   return newsz;
 }
@@ -337,10 +339,9 @@ copyuvm(pde_t *pgdir, uint sz)
       goto bad;
   }
 
-  //if( stackTop == 0 )
-    //return d;
   // Loop to copy stack
-  for(i = USERTOP - myproc()->stackSize*PGSIZE + 4; i < USERTOP; i += PGSIZE){
+  for(i = KERNBASE - (myproc()->stackSize )*PGSIZE ; i < KERNBASE  ; i += PGSIZE){
+//cprintf("\nCOPY=> PID%d :: PARENT:%d\n", myproc()->pid, myproc()->parent->pid);
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm2: pte should exist");
     if(!(*pte & PTE_P))

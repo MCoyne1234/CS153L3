@@ -72,10 +72,12 @@ sys_sbrk(void)
 
   if(argint(0, &n) < 0)
     return -1;
-  addr = myproc()->sz;
-  myproc()->sz += PGROUNDUP(n);
-  //if(growproc(n) < 0)
-  //  return -1;
+  //addr = PGROUNDDOWN(KERNBASE - myproc()->stackSize*PGSIZE - n );
+  addr = PGROUNDDOWN(USERTOP - myproc()->stackSize*PGSIZE - n);
+  //addr = myproc()->sz;
+  //myproc()->sz += PGROUNDUP(n);
+  if(growproc(n) < 0)
+    return -1;
   return addr;
 }
 

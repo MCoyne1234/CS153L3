@@ -160,18 +160,22 @@ growproc(int n)
 {
   uint sz;
   struct proc *curproc = myproc();
-
+  
   //sz = curproc->sz;
-  sz = curproc->stackSize*PGSIZE;
+  sz = KERNBASE - curproc->stackSize*PGSIZE;
+  //sz = USERTOP - curproc->stackSize*PGSIZE;
   if(n > 0){
-    if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
+    //if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
+    if((sz = allocuvm(curproc->pgdir, PGROUNDDOWN(sz-n), sz)) == 0)
       return -1;
+    curproc->stackSize += PGROUNDUP(n)/PGSIZE;
   } else if(n < 0){
-    if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0)
+    //if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0)
+    if((sz = deallocuvm(curproc->pgdir, PGROUNDDOWN(sz-n), sz)) == 0)
       return -1;
+    curproc->stackSize -= PGROUNDUP(n)/PGSIZE;
   }
   //curproc->sz = sz;
-  ++(curproc->stackSize);
   switchuvm(curproc);
   return 0;
 }
@@ -186,6 +190,8 @@ fork(void)
   struct proc *np;
   struct proc *curproc = myproc();
 
+//cprintf("\nFORK PID%d :: PARENT:%d\n", myproc()->pid, myproc()->parent->pid);
+//cprintf("\nFORK PID=%d :: STACKSIZE=%d\n", myproc()->pid, myproc()->stackSize);
   // Allocate process.
   if((np = allocproc()) == 0){
     return -1;

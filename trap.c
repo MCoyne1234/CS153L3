@@ -81,27 +81,21 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
   case T_PGFLT:
-    rcr = rcr2();
+    if( (rcr = rcr2() ) == -1){
+      myproc()->killed = 1 ;
+      break;
+    }
 //cprintf("PAGEFAULT: ALLOCATING MORE PAGES. rcr2() = %d PROCESS STACK PAGES: %d\n", rcr, myproc()->stackSize );  // LAB3 Prints the Address that caused the page fault;
+    //growproc(PGSIZE);
 ///*  
       if ( (sp = allocuvm( myproc()->pgdir, rcr - PGSIZE, rcr )) == 0 ){
-          //cprintf("OUT OF MEMORY. PROGRAM WILL EXIT. PROCESS STACK PAGES: %d\n", myproc()->stackSize);
+  //        cprintf("OUT OF MEMORY. PROGRAM WILL EXIT. PROCESS STACK PAGES: %d\n", myproc()->stackSize);
           myproc()->killed = 1;
           exit();
-      }else{
-        ++(myproc()->stackSize);
       }
-//*/
-   ///*
-    if( myproc()->stackSize > 8) {
-      cprintf("KILLED\n");
-      myproc()->killed = 1;
-    }
-   //*/
- ++(myproc()->stackSize);
-    //lapiceoi()
-    return;
-    break;
+      //++(myproc()->stackSize);   
+//*/ 
+      break;
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
